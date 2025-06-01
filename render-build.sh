@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
+set -o errexit
 
-# fail the script on error
-set -e
+echo "🔧 Installing root dependencies"
+npm install
 
-# install and build client
+echo "🔧 Building client"
 cd client
 npm install
 npm run build
 cd ..
 
-# install server/root dependencies
-npm install
+echo "🚀 Build complete"
