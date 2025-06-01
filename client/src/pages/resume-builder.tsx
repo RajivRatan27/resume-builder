@@ -42,6 +42,13 @@ interface Certification {
   organization: string;
 }
 
+interface Project {
+  name: string;
+  description: string;
+  technologies: string;
+  link: string;
+}
+
 interface Skills {
   technical: string;
   languages: string;
@@ -82,6 +89,13 @@ export default function ResumeBuilder() {
     title: '',
     year: '',
     organization: ''
+  }]);
+
+  const [projects, setProjects] = useState<Project[]>([{
+    name: '',
+    description: '',
+    technologies: '',
+    link: ''
   }]);
 
   const [skills, setSkills] = useState<Skills>({
@@ -178,6 +192,25 @@ export default function ResumeBuilder() {
     ));
   };
 
+  const addProject = () => {
+    setProjects(prev => [...prev, {
+      name: '',
+      description: '',
+      technologies: '',
+      link: ''
+    }]);
+  };
+
+  const removeProject = (index: number) => {
+    setProjects(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const updateProject = (index: number, field: keyof Project, value: string) => {
+    setProjects(prev => prev.map((project, i) => 
+      i === index ? { ...project, [field]: value } : project
+    ));
+  };
+
   const updateSkills = (field: keyof Skills, value: string) => {
     setSkills(prev => ({ ...prev, [field]: value }));
   };
@@ -256,6 +289,20 @@ export default function ResumeBuilder() {
           exp.bulletPoints.filter(bullet => bullet.trim()).forEach(bullet => {
             docContent += `• ${bullet}\n`;
           });
+          docContent += '\n';
+        });
+      }
+
+      // Projects
+      const validProjects = projects.filter(project => project.name || project.description);
+      if (validProjects.length > 0) {
+        docContent += 'PROJECTS\n';
+        validProjects.forEach(project => {
+          docContent += `${project.name || 'Project Name'}`;
+          if (project.link) docContent += ` | ${project.link}`;
+          docContent += '\n';
+          if (project.description) docContent += `${project.description}\n`;
+          if (project.technologies) docContent += `Technologies: ${project.technologies}\n`;
           docContent += '\n';
         });
       }
@@ -669,6 +716,76 @@ export default function ResumeBuilder() {
               </CardContent>
             </Card>
 
+            {/* Projects */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <FileText className="w-5 h-5 text-blue-600" />
+                  <span>Projects</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {projects.map((project, index) => (
+                  <div key={index} className="p-4 border border-gray-200 rounded-lg space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <Label>Project Name</Label>
+                        <Input
+                          value={project.name}
+                          onChange={(e) => updateProject(index, 'name', e.target.value)}
+                          placeholder="E-commerce Website"
+                        />
+                      </div>
+                      <div>
+                        <Label>Link (Optional)</Label>
+                        <Input
+                          value={project.link}
+                          onChange={(e) => updateProject(index, 'link', e.target.value)}
+                          placeholder="https://github.com/username/project"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Description</Label>
+                      <Textarea
+                        value={project.description}
+                        onChange={(e) => updateProject(index, 'description', e.target.value)}
+                        placeholder="Describe the project, its purpose, and key features..."
+                        rows={2}
+                      />
+                    </div>
+                    <div>
+                      <Label>Technologies</Label>
+                      <Input
+                        value={project.technologies}
+                        onChange={(e) => updateProject(index, 'technologies', e.target.value)}
+                        placeholder="React, Node.js, MongoDB, Express"
+                      />
+                    </div>
+                    {projects.length > 1 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => removeProject(index)}
+                        className="text-red-600 hover:text-red-800"
+                      >
+                        <Trash2 className="w-4 h-4 mr-1" />
+                        Remove
+                      </Button>
+                    )}
+                  </div>
+                ))}
+                <Button
+                  variant="outline"
+                  onClick={addProject}
+                  className="w-full border-dashed"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Project
+                </Button>
+              </CardContent>
+            </Card>
+
             {/* Skills */}
             <Card>
               <CardHeader>
@@ -719,21 +836,21 @@ export default function ResumeBuilder() {
                 <CardTitle>Live Preview</CardTitle>
               </CardHeader>
               <CardContent>
-                <div id="resume-preview" className="bg-white p-8 shadow-lg rounded-lg min-h-[800px] font-serif text-sm leading-relaxed">
+                <div id="resume-preview" className="bg-white p-6 shadow-lg rounded-lg min-h-[800px] font-sans text-sm leading-tight">
                   {/* Header */}
-                  <div className="text-center border-b-2 border-gray-800 pb-3 mb-6">
-                    <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                  <div className="text-center border-b-2 border-gray-800 pb-2 mb-4">
+                    <h1 className="text-2xl font-bold text-gray-900 mb-1">
                       {personalInfo.firstName || personalInfo.lastName 
                         ? `${personalInfo.firstName} ${personalInfo.lastName}`.trim()
                         : 'Your Name'}
                     </h1>
-                    <div className="text-gray-700 space-y-1">
+                    <div className="text-gray-700 text-xs space-y-1">
                       {personalInfo.email && <div>{personalInfo.email}</div>}
-                      <div className="flex justify-center space-x-4 text-sm">
+                      <div className="flex justify-center space-x-3">
                         {personalInfo.phone && <span>{personalInfo.phone}</span>}
                         {personalInfo.location && <span>{personalInfo.location}</span>}
                       </div>
-                      <div className="flex justify-center space-x-4 text-sm">
+                      <div className="flex justify-center space-x-3">
                         {personalInfo.linkedin && <span>LinkedIn: {personalInfo.linkedin}</span>}
                         {personalInfo.github && <span>GitHub: {personalInfo.github}</span>}
                         {personalInfo.website && <span>Website: {personalInfo.website}</span>}
@@ -743,18 +860,18 @@ export default function ResumeBuilder() {
 
                   {/* Education */}
                   {educations.some(edu => edu.school || edu.degree) && (
-                    <div className="mb-6">
-                      <h2 className="text-lg font-bold text-gray-900 border-b border-gray-400 pb-1 mb-3">
+                    <div className="mb-4">
+                      <h2 className="text-base font-bold text-gray-900 border-b border-gray-400 pb-1 mb-2">
                         EDUCATION
                       </h2>
                       {educations.filter(edu => edu.school || edu.degree).map((edu, index) => (
-                        <div key={index} className="mb-3">
+                        <div key={index} className="mb-2">
                           <div className="flex justify-between items-start">
                             <div className="flex-1">
-                              <div className="font-semibold">{edu.degree || 'Degree'}</div>
-                              <div className="italic">{edu.school || 'School'}</div>
+                              <div className="font-semibold text-sm">{edu.degree || 'Degree'}</div>
+                              <div className="italic text-sm">{edu.school || 'School'}</div>
                             </div>
-                            <div className="text-right">
+                            <div className="text-right text-sm">
                               <div>{edu.location}</div>
                               <div>{edu.graduationYear}</div>
                               {edu.gpa && <div>GPA: {edu.gpa}</div>}
@@ -767,24 +884,24 @@ export default function ResumeBuilder() {
 
                   {/* Experience */}
                   {experiences.some(exp => exp.jobTitle || exp.company) && (
-                    <div className="mb-6">
-                      <h2 className="text-lg font-bold text-gray-900 border-b border-gray-400 pb-1 mb-3">
+                    <div className="mb-4">
+                      <h2 className="text-base font-bold text-gray-900 border-b border-gray-400 pb-1 mb-2">
                         EXPERIENCE
                       </h2>
                       {experiences.filter(exp => exp.jobTitle || exp.company).map((exp, index) => (
-                        <div key={index} className="mb-4">
-                          <div className="flex justify-between items-start mb-2">
+                        <div key={index} className="mb-3">
+                          <div className="flex justify-between items-start mb-1">
                             <div className="flex-1">
-                              <div className="font-semibold">{exp.jobTitle || 'Job Title'}</div>
-                              <div className="italic">{exp.company || 'Company'}</div>
+                              <div className="font-semibold text-sm">{exp.jobTitle || 'Job Title'}</div>
+                              <div className="italic text-sm">{exp.company || 'Company'}</div>
                             </div>
-                            <div className="text-right">
+                            <div className="text-right text-sm">
                               <div>{exp.location}</div>
                               <div>{formatDate(exp.startDate)} - {exp.current ? 'Present' : formatDate(exp.endDate)}</div>
                             </div>
                           </div>
                           {exp.bulletPoints.filter(bullet => bullet.trim()).length > 0 && (
-                            <ul className="list-disc list-inside space-y-1 ml-4">
+                            <ul className="list-disc list-inside space-y-0.5 ml-3 text-sm">
                               {exp.bulletPoints.filter(bullet => bullet.trim()).map((bullet, bulletIndex) => (
                                 <li key={bulletIndex} className="text-gray-800">{bullet}</li>
                               ))}
@@ -795,20 +912,45 @@ export default function ResumeBuilder() {
                     </div>
                   )}
 
+                  {/* Projects */}
+                  {projects.some(project => project.name || project.description) && (
+                    <div className="mb-4">
+                      <h2 className="text-base font-bold text-gray-900 border-b border-gray-400 pb-1 mb-2">
+                        PROJECTS
+                      </h2>
+                      {projects.filter(project => project.name || project.description).map((project, index) => (
+                        <div key={index} className="mb-3">
+                          <div className="flex justify-between items-start mb-1">
+                            <div className="flex-1">
+                              <div className="font-semibold text-sm">{project.name || 'Project Name'}</div>
+                              {project.link && <div className="text-xs text-blue-600">{project.link}</div>}
+                            </div>
+                          </div>
+                          {project.description && (
+                            <div className="text-sm text-gray-800 mb-1">{project.description}</div>
+                          )}
+                          {project.technologies && (
+                            <div className="text-xs text-gray-600 italic">Technologies: {project.technologies}</div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
                   {/* Certifications */}
                   {certifications.some(cert => cert.title || cert.organization) && (
-                    <div className="mb-6">
-                      <h2 className="text-lg font-bold text-gray-900 border-b border-gray-400 pb-1 mb-3">
+                    <div className="mb-4">
+                      <h2 className="text-base font-bold text-gray-900 border-b border-gray-400 pb-1 mb-2">
                         CERTIFICATIONS & AWARDS
                       </h2>
                       {certifications.filter(cert => cert.title || cert.organization).map((cert, index) => (
                         <div key={index} className="mb-2">
                           <div className="flex justify-between items-start">
                             <div className="flex-1">
-                              <div className="font-semibold">{cert.title || 'Title'}</div>
-                              <div className="italic">{cert.organization || 'Organization'}</div>
+                              <div className="font-semibold text-sm">{cert.title || 'Title'}</div>
+                              <div className="italic text-sm">{cert.organization || 'Organization'}</div>
                             </div>
-                            <div>{cert.year}</div>
+                            <div className="text-sm">{cert.year}</div>
                           </div>
                         </div>
                       ))}
@@ -817,22 +959,22 @@ export default function ResumeBuilder() {
 
                   {/* Skills */}
                   {(skills.technical || skills.languages || skills.interests) && (
-                    <div className="mb-6">
-                      <h2 className="text-lg font-bold text-gray-900 border-b border-gray-400 pb-1 mb-3">
+                    <div className="mb-4">
+                      <h2 className="text-base font-bold text-gray-900 border-b border-gray-400 pb-1 mb-2">
                         SKILLS
                       </h2>
                       {skills.technical && (
-                        <div className="mb-2">
+                        <div className="mb-1 text-sm">
                           <span className="font-semibold">Technical:</span> {skills.technical}
                         </div>
                       )}
                       {skills.languages && (
-                        <div className="mb-2">
+                        <div className="mb-1 text-sm">
                           <span className="font-semibold">Languages:</span> {skills.languages}
                         </div>
                       )}
                       {skills.interests && (
-                        <div className="mb-2">
+                        <div className="mb-1 text-sm">
                           <span className="font-semibold">Interests:</span> {skills.interests}
                         </div>
                       )}
