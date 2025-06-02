@@ -1,13 +1,19 @@
 #!/usr/bin/env bash
 set -o errexit
 
-echo "🔧 Installing root dependencies"
+# Install dependencies in root and client
+echo "🔧 Installing dependencies"
 npm install
-
-echo "🔧 Building client"
-cd client
-npm install
-npm run build
+cd client && npm install
 cd ..
+
+# Build the client
+echo "🔧 Building client"
+cd client && npm run build
+cd ..
+
+# Build server (if needed)
+echo "🔧 Building server"
+npm run build:server
 
 echo "🚀 Build complete"

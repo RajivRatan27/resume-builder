@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "type": "module",
   "license": "MIT",
-  "scripts": {
-  "build": "./render-build.sh",
-  "start": "npx ts-node server/production.ts"
-}
+ "scripts": {
+    "build:server": "tsc -p server/tsconfig.json",
+    "build": "bash render-build.sh",
+    "start": "node dist/server/production.js"
+  }
 ,
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
